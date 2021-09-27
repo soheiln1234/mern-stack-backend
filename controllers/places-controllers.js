@@ -63,7 +63,7 @@ const createPlace = async (req, res, next) => {
   if (!error.isEmpty()) {
     console.log(error);
     return next(
-      HttpError("Invalid Input passed, please check your data.", 422)
+      new HttpError("Invalid Input passed, please check your data.", 422)
     );
   }
 
