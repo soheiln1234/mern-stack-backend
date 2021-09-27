@@ -70,16 +70,23 @@ const signup = async (req, res, next) => {
   res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const identifiedUser = DUMMY_USERS.find((user) => user.email === email);
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email });
+  } catch (err) {
+    const error = new HttpError("Logging failed, please try again later", 500);
+    return next(error);
+  }
 
-  if (!identifiedUser || identifiedUser.password != password) {
-    throw new HttpError(
-      "Could not identified user, credintial seem to be wrong.",
+  if (!existingUser || existingUser.password !== password) {
+    const error = new HttpError(
+      "Invalid credintial, could not log you in",
       401
     );
+    return next(error);
   }
 
   res.json({ message: "Logged in!" });
