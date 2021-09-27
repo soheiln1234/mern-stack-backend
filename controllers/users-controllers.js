@@ -6,15 +6,6 @@ const User = require("../models/user");
 const { validationResult } = require("express-validator");
 const user = require("../models/user");
 
-const DUMMY_USERS = [
-  {
-    id: "u1",
-    name: "Soheil",
-    email: "soheil@gmail.com",
-    password: "89829829829",
-  },
-];
-
 const getUsers = (req, res, next) => {
   res.json({ users: DUMMY_USERS });
 };
