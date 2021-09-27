@@ -1,10 +1,13 @@
 const HttpError = require("../models/http-error");
 const { v4: uuid } = require("uuid");
 
+const mongoose = require("mongoose");
+
 const getCordsForAddress = require("../util/location");
 
 const { validationResult } = require("express-validator");
 const Place = require("../models/places");
+const User = require("../models/user");
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
@@ -84,14 +87,39 @@ const createPlace = async (req, res, next) => {
       "https://images.pexels.com/photos/5847338/pexels-photo-5847338.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
     creator,
   });
+
+  let user;
   try {
-    await createdPlace.save();
-  } catch (er) {
+    user = await User.findById(creator);
+  } catch (err) {
+    const error = new HttpError(
+      "Creating place failed. please try again later",
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("Could not find user for provided id.", 404);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdPlace.save({ session: sess });
+
+    user.places.push(createdPlace);
+
+    await user.save({ session: sess });
+
+    await sess.commitTransaction();
+  } catch (err) {
     const error = new HttpError(
       "Creating place failed, please try again.",
       500
     );
-    console.log(er);
+    console.log(err);
     return next(error);
   }
 
