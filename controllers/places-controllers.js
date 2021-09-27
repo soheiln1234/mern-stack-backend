@@ -1,10 +1,6 @@
 const HttpError = require("../models/http-error");
-const { v4: uuid } = require("uuid");
-
 const mongoose = require("mongoose");
-
 const getCordsForAddress = require("../util/location");
-
 const { validationResult } = require("express-validator");
 const Place = require("../models/places");
 const User = require("../models/user");
